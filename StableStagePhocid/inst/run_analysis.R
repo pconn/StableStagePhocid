@@ -14,12 +14,14 @@
 
 library(glmmLDTS)
 
-Maturity = read.csv("./data/Maturity.csv")
-Survival = read.csv("./data/Survival_ests.csv")
-Reprod = read.csv("./data/Reproduction_table.csv")
+Maturity = read.csv("./StableStagePhocid/data/Maturity.csv")
+Survival = read.csv("./StableStagePhocid/data/Survival_ests.csv")
+Reprod = read.csv("./StableStagePhocid/data/Reproduction_table.csv")
 
-load('./data/fit_ribbon.RData')  #from London et al. 2021
-load('./data/fit_spotted.RData')
+remotes::install_github('jmlondon/berchukFits') #London et al. 2021 availability predictions
+library(berchukFits)
+data(ribbon_fit)
+data(spotted_fit)
 
 # set up leslie matrices - via an array (4 matrices, one for each species)
 A = array(0,dim=c(4,40,40))  
@@ -106,8 +108,7 @@ SS_plot = ggplot(data=Plot_df,aes(x=Stage,y=Proportion,fill=Sex))+
 #  fit GLMPMs to spotted and ribbon seal data w/ (1) just DOY and TOD and (2) DOY, TOD, and age-sex class.
 #  then produce predictions at solar noon and adjust with stable stage distributions to compare
 ####################
-
-HO_ribbon = fit_ribbon$dataset
+HO_ribbon = ribbon_fit$dataset
 AS.ribbon <- glmmLDTS(fixed.formula = dry ~ age_sex + sin1 + cos1 + sin2 + cos2 + sin3 + cos3 + day + day2+ day3 + 
                         sin1*day + cos1*day + sin2*day + cos2*day + sin3*day + cos3*day +
                         sin1*day2 + cos1*day2 + sin2*day2 + cos2*day2 + sin3*day2 + cos3*day2 +   
@@ -129,8 +130,7 @@ Const.ribbon <- glmmLDTS(fixed.formula = dry ~ sin1 + cos1 + sin2 + cos2 + sin3 
                          timecol = "time_vec", 
                          group.vec = "ar1_id")
 
-load("c:/users/paul.conn/git/haulout/London_analysis/berchukHaulout/data/fit_spotted.RData")
-HO_spotted = fit_spotted$dataset
+HO_spotted = spotted_fit$dataset
 
 AS.spotted <- glmmLDTS(fixed.formula = dry ~ age_sex + sin1 + cos1 + sin2 + cos2 + sin3 + cos3 + day + day2+ day3 + 
                          sin1*day + cos1*day + sin2*day + cos2*day + sin3*day + cos3*day +
